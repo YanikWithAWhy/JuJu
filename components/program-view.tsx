@@ -79,7 +79,7 @@ export function ProgramView() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 print:py-0">
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 print:px-0 print:py-0">
         {/* Title block */}
         <header className="mb-6 flex items-end justify-between gap-4 border-b border-white/10 pb-5 print:border-neutral-300">
           <div>
@@ -90,7 +90,9 @@ export function ProgramView() {
               {belt.kyu}. Kyu — {belt.name}
             </h1>
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-white/55 print:text-neutral-600">
-              {state.examinee && <span>Prüfling: {state.examinee}</span>}
+              {state.examinee && (
+                <span className="font-medium text-white print:text-black">{state.examinee}</span>
+              )}
               {state.club && <span>Verein: {state.club}</span>}
               {state.date && <span>Datum: {formatDate(state.date)}</span>}
             </div>

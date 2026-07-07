@@ -143,7 +143,12 @@ body::before {
   .print-avoid-break {
     break-inside: avoid;
   }
+  /* Zero page margin suppresses the browser's own header/footer (print date +
+   * document title); the printable margin comes from body padding instead. */
   @page {
-    margin: 14mm;
+    margin: 0;
+  }
+  body {
+    padding: 14mm;
   }
 }
