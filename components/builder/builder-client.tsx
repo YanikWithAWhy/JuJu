@@ -8,15 +8,20 @@ import type { BeltId } from "@/data/types";
 import { getBelt } from "@/data/belts";
 import { decodeState, encodeState } from "@/lib/encode";
 import {
+  collectTechniques,
   createEmptyState,
   defaultSteps,
   entryKey,
+  locate,
+  newStepId,
   type ProgramState,
   type TechniqueEntry,
 } from "@/lib/program-state";
 import { BeltVisual } from "@/components/ui/belt-visual";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { BuilderLinkContext, type BuilderLinkApi } from "./builder-context";
+import { LinkPickerDialog } from "./link-picker-dialog";
 import { BuilderToc } from "./builder-toc";
 import { FachSection } from "./fach-section";
 import { ExportBar } from "./export-bar";
@@ -73,6 +78,32 @@ export function BuilderClient() {
   const setMeta = (partial: Partial<ProgramState>) =>
     setState((s) => ({ ...s, ...partial }));
 
+  // ---- "Übernehmen": copy another technique's flowchart into this one -------
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
+
+  const copyInto = useCallback((destKey: string, srcKey: string) => {
+    setState((s) => {
+      const src = s.entries[srcKey];
+      if (!src) return s;
+      const dest = s.entries[destKey];
+      // Deep copy the flowchart with fresh ids; keep the destination's own attack.
+      const steps = src.steps.map((st) => ({ id: newStepId(), kind: st.kind, text: st.text }));
+      return {
+        ...s,
+        entries: { ...s.entries, [destKey]: { attack: dest?.attack ?? "", steps } },
+      };
+    });
+    setPickerFor(null);
+  }, []);
+
+  const linkApi = useMemo<BuilderLinkApi>(
+    () => ({
+      locate: (key) => (belt ? locate(belt, key) : null),
+      openPicker: (destKey) => setPickerFor(destKey),
+    }),
+    [belt],
+  );
+
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const confirmClear = () => {
     setState((s) => ({ belt: s.belt, entries: {} }));
@@ -122,6 +153,7 @@ export function BuilderClient() {
   const pct = progress.total > 0 ? Math.round((progress.filled / progress.total) * 100) : 0;
 
   return (
+    <BuilderLinkContext.Provider value={linkApi}>
     <div style={{ "--accent": belt.color } as React.CSSProperties} className="min-h-screen">
       {/* Sticky action bar */}
       <div className="sticky top-0 z-30 border-b border-white/10 bg-background/80 backdrop-blur-xl">
@@ -254,7 +286,18 @@ export function BuilderClient() {
         onConfirm={confirmClear}
         onCancel={() => setConfirmClearOpen(false)}
       />
+
+      <LinkPickerDialog
+        open={!!pickerFor}
+        candidates={pickerFor ? collectTechniques(state, belt, pickerFor) : []}
+        accent={belt.color}
+        onSelect={(c) => {
+          if (pickerFor) copyInto(pickerFor, c.key);
+        }}
+        onClose={() => setPickerFor(null)}
+      />
     </div>
+    </BuilderLinkContext.Provider>
   );
 }
 

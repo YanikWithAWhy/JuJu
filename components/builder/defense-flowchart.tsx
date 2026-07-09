@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { Plus, Swords, X, Zap } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { stepNodeLabel, type StepKind, type StepNode } from "@/lib/program-state";
+import { newStepId, stepNodeLabel, type StepKind, type StepNode } from "@/lib/program-state";
 
 function placeholderFor(kind: StepKind) {
   if (kind === "verteidigung") return "z. B. Außenblock & ausweichen …";
@@ -24,7 +24,6 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
   const containerRef = useRef<HTMLDivElement>(null);
   const focusTarget = useRef<number | null>(null);
 
-  // After a node is added (via Enter or a button), move focus into it.
   useEffect(() => {
     if (focusTarget.current == null) return;
     const idx = focusTarget.current;
@@ -47,16 +46,19 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
   const insertAfter = (i: number, kind: StepKind) => {
     if (!onChange) return;
     focusTarget.current = i + 1;
-    onChange([...steps.slice(0, i + 1), { kind, text: "" }, ...steps.slice(i + 1)]);
+    onChange([
+      ...steps.slice(0, i + 1),
+      { id: newStepId(), kind, text: "" },
+      ...steps.slice(i + 1),
+    ]);
   };
 
   const append = (kind: StepKind) => {
     if (!onChange) return;
     focusTarget.current = steps.length;
-    onChange([...steps, { kind, text: "" }]);
+    onChange([...steps, { id: newStepId(), kind, text: "" }]);
   };
 
-  // Only counter/follow-up nodes (index >= 1) can be removed.
   const removeStep = (i: number) => onChange?.(steps.filter((_, idx) => idx !== i));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, i: number) => {
@@ -72,13 +74,11 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
     }
   };
 
-  // Number the steps; counter techniques are shown with a bolt instead of a number.
   let counter = 0;
   const badges = steps.map((s) =>
     s.kind === "gegen" ? { gegen: true as const } : { gegen: false as const, n: ++counter },
   );
 
-  // In read-only mode, collapse to the filled-in nodes only.
   const visibleSteps = readOnly
     ? steps.map((s, i) => ({ s, i })).filter(({ s }) => s.text.trim().length > 0)
     : steps.map((s, i) => ({ s, i }));
@@ -86,8 +86,6 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
   if (readOnly && visibleSteps.length === 0 && !attack.trim()) {
     return <p className="text-sm italic text-white/30">Noch nicht ausgefüllt.</p>;
   }
-
-  const lastStepIsTail = readOnly; // editor adds a button row after the steps
 
   return (
     <div ref={containerRef} className="flex w-full max-w-md flex-col">
@@ -117,8 +115,8 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
         const badge = badges[i];
         return (
           <Row
-            key={i}
-            last={lastStepIsTail && idx === visibleSteps.length - 1}
+            key={s.id}
+            last={readOnly && idx === visibleSteps.length - 1}
             badge={
               badge.gegen ? (
                 <Badge className="border-amber-400/40 bg-amber-400/15 text-amber-300">
@@ -146,7 +144,7 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
                 )}
               </div>
               {readOnly ? (
-                <div className="text-sm text-white/90">{s.text || "—"}</div>
+                <div className="mt-0.5 text-sm text-white/90">{s.text || "—"}</div>
               ) : (
                 <input
                   type="text"
@@ -155,7 +153,7 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
                   onChange={(e) => setStep(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   placeholder={placeholderFor(s.kind)}
-                  className="w-full bg-transparent text-sm text-white placeholder:text-white/25 focus:outline-none"
+                  className="mt-0.5 w-full bg-transparent text-sm text-white placeholder:text-white/25 focus:outline-none"
                 />
               )}
             </div>

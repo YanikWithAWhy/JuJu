@@ -128,33 +128,59 @@ function FachReadOnly({
 }) {
   const dimmed = fach.kind === "notExamined";
 
+  const header = (
+    <div className="flex items-center gap-3">
+      <span
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
+        style={
+          fach.kind === "techniques"
+            ? { backgroundColor: `${accent}26`, color: accent }
+            : { backgroundColor: "rgba(0,0,0,0.06)", color: "var(--accent)" }
+        }
+      >
+        {fach.number}
+      </span>
+      <h2 className="text-base font-semibold text-white print:text-black">{fach.title}</h2>
+    </div>
+  );
+
+  // Techniques: rendered as a table so the header (<thead>) repeats at the top of
+  // each page the Fach spans (the "continued on next page" cue), while each
+  // technique row stays whole (break-inside: avoid) and moves to the next page
+  // instead of splitting between attack and steps.
+  if (fach.kind === "techniques") {
+    return (
+      <table className="w-full border-separate border-spacing-0 rounded-2xl border border-white/10 bg-white/[0.02] align-top print:border-neutral-300 print:bg-white">
+        <thead>
+          <tr>
+            <th
+              scope="col"
+              className="border-b border-white/10 px-5 pb-3 pt-4 text-left align-top print:border-neutral-200"
+            >
+              {header}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {fach.techniques?.map((tech) => (
+            <tr key={tech.id} className="break-inside-avoid align-top">
+              <td className="px-5 py-2.5 align-top">
+                <TechReadOnly tech={tech} state={state} accent={accent} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   return (
     <section
-      className={`print-avoid-break rounded-2xl border border-white/10 bg-white/[0.02] p-5 print:border-neutral-300 print:bg-[#fff] ${
+      className={`break-inside-avoid rounded-2xl border border-white/10 bg-white/[0.02] p-5 print:border-neutral-300 print:bg-white ${
         dimmed ? "opacity-60 print:opacity-100" : ""
       }`}
     >
-      <header className="mb-3 flex items-center gap-3">
-        <span
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
-          style={
-            fach.kind === "techniques"
-              ? { backgroundColor: `${accent}26`, color: accent }
-              : { backgroundColor: "rgba(0,0,0,0.06)", color: "var(--accent)" }
-          }
-        >
-          {fach.number}
-        </span>
-        <h2 className="text-base font-semibold text-white print:text-black">{fach.title}</h2>
-      </header>
-
-      {fach.kind === "techniques" && (
-        <div className="space-y-3">
-          {fach.techniques?.map((tech) => (
-            <TechReadOnly key={tech.id} tech={tech} state={state} accent={accent} />
-          ))}
-        </div>
-      )}
+      <header className="mb-3">{header}</header>
 
       {fach.kind === "info" && (
         <div className="pl-11">
@@ -204,7 +230,7 @@ function TechReadOnly({
   const executions = tech.executions ?? 1;
 
   return (
-    <div className="pl-11">
+    <div className="break-inside-avoid pl-11">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className="font-mono text-xs text-white/35 print:text-neutral-400">{tech.id}</span>
         <span className="font-medium text-white print:text-black">{tech.label}</span>

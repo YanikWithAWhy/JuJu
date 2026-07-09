@@ -1,9 +1,11 @@
 "use client";
 
 import { memo } from "react";
+import { Import } from "lucide-react";
 import type { TechniqueDef } from "@/data/types";
 import type { TechniqueEntry } from "@/lib/program-state";
 import { entryKey, defaultSteps } from "@/lib/program-state";
+import { useBuilderLink } from "./builder-context";
 import { DefenseFlowchart } from "./defense-flowchart";
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 function TechniqueRowImpl({ tech, accent, entries, onPatch }: Props) {
   const executions = tech.executions ?? 1;
   const readOnly = !onPatch;
+  const link = useBuilderLink();
 
   return (
     <div className="py-5 first:pt-0 last:pb-0">
@@ -49,7 +52,10 @@ function TechniqueRowImpl({ tech, accent, entries, onPatch }: Props) {
             const fallbackAttack = predefined;
             const entry: TechniqueEntry =
               entries[key] ?? { attack: fallbackAttack, steps: defaultSteps() };
-            const attackValue = entry.attack;
+            // Predefined (weapon) attacks always come from the technique data,
+            // so a linked/auto-created entry can't lose them.
+            const attackValue =
+              tech.attackMode === "predefined" ? predefined : entry.attack;
 
             return (
               <div
@@ -90,9 +96,20 @@ function TechniqueRowImpl({ tech, accent, entries, onPatch }: Props) {
 
                 {tech.flowchart && (
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-white/45">
-                      Ablauf
-                    </label>
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <label className="block text-xs font-medium text-white/45">Ablauf</label>
+                      {!readOnly && link && (
+                        <button
+                          type="button"
+                          onClick={() => link.openPicker(key)}
+                          title="Bereits gezeigte Technik übernehmen"
+                          className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.7rem] font-medium text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/80"
+                        >
+                          <Import className="size-3.5" />
+                          Übernehmen
+                        </button>
+                      )}
+                    </div>
                     <DefenseFlowchart
                       attack={attackValue}
                       steps={entry.steps}
