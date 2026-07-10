@@ -3,7 +3,7 @@
 import { Fragment, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ChevronRight, Pencil, Printer } from "lucide-react";
+import { ArrowLeft, ChevronDown, Pencil, Printer } from "lucide-react";
 import type { PruefungsfachDef, TechniqueDef } from "@/data/types";
 import { getBelt } from "@/data/belts";
 import { decodeState } from "@/lib/encode";
@@ -283,7 +283,7 @@ function FlowChain({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-col items-start gap-1">
       {showAttack && (
         <span
           className="rounded-lg border px-2.5 py-1 text-sm text-white/90 print:text-black"
@@ -298,7 +298,7 @@ function FlowChain({
       {filled.map(({ s, i }, idx) => (
         <Fragment key={i}>
           {(showAttack || idx > 0) && (
-            <ChevronRight className="size-4 text-white/25 print:text-neutral-400" />
+            <ChevronDown className="ml-2 size-3.5 text-white/25 print:text-neutral-400" />
           )}
           <span className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-sm text-white/90 print:border-neutral-300 print:bg-neutral-50 print:text-black">
             <span className="mr-1.5 text-[0.6rem] font-semibold uppercase tracking-wide text-white/40 print:text-neutral-500">
