@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import type { BeltDef } from "@/data/types";
+import { gradeLabel } from "@/data/belts";
 import { BeltVisual } from "./belt-visual";
 
 export function BeltCard({ belt, index }: { belt: BeltDef; index: number }) {
@@ -31,7 +32,7 @@ export function BeltCard({ belt, index }: { belt: BeltDef; index: number }) {
         <div className="mb-5 flex items-start justify-between">
           <div>
             <div className="text-[0.7rem] font-medium uppercase tracking-[0.18em] text-white/45">
-              {belt.kyu}. Kyu
+              {gradeLabel(belt)}
             </div>
             <div className="mt-1 text-xl font-semibold text-white">{belt.name}</div>
           </div>
@@ -44,7 +45,7 @@ export function BeltCard({ belt, index }: { belt: BeltDef; index: number }) {
         </div>
 
         <div className="mx-auto w-28 py-2 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:-rotate-2">
-          <BeltVisual color={belt.color} />
+          <BeltVisual color={belt.beltColor ?? belt.color} stripes={belt.stripes} stripeColor={belt.color} />
         </div>
 
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-sm text-white/55">

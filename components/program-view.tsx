@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronDown, Pencil, Printer } from "lucide-react";
 import type { PruefungsfachDef, TechniqueDef } from "@/data/types";
-import { getBelt } from "@/data/belts";
+import { getBelt, gradeLabel } from "@/data/belts";
 import { decodeState } from "@/lib/encode";
 import { entryKey, stepNodeLabel, type ProgramState, type StepNode } from "@/lib/program-state";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -87,7 +87,7 @@ export function ProgramView() {
               Ju-Jutsu Prüfungsprogramm
             </p>
             <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-white print:text-black">
-              {belt.kyu}. Kyu — {belt.name}
+              {gradeLabel(belt)} — {belt.name}
             </h1>
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-white/55 print:text-neutral-600">
               {state.examinee && (
@@ -99,7 +99,7 @@ export function ProgramView() {
           </div>
           <span
             className="hidden size-12 shrink-0 rounded-full sm:block"
-            style={{ backgroundColor: belt.color }}
+            style={{ backgroundColor: belt.beltColor ?? belt.color, boxShadow: `0 0 0 2px ${belt.color}` }}
           />
         </header>
 

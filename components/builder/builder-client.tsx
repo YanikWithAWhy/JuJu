@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import type { BeltId } from "@/data/types";
-import { getBelt } from "@/data/belts";
+import { getBelt, gradeLabel } from "@/data/belts";
 import { decodeState, encodeState } from "@/lib/encode";
 import {
   collectTechniques,
@@ -167,9 +167,12 @@ export function BuilderClient() {
           </Link>
           <span className="h-5 w-px bg-white/10" />
           <div className="flex items-center gap-2">
-            <span className="size-3 rounded-full" style={{ backgroundColor: belt.color }} />
+            <span
+              className="size-3 rounded-full"
+              style={{ backgroundColor: belt.beltColor ?? belt.color, boxShadow: `0 0 0 1.5px ${belt.color}` }}
+            />
             <span className="text-sm font-medium text-white">
-              {belt.kyu}. Kyu
+              {gradeLabel(belt)}
               <span className="hidden text-white/45 sm:inline"> · {belt.name}</span>
             </span>
           </div>
@@ -190,14 +193,14 @@ export function BuilderClient() {
         <div className="glass rounded-2xl p-6">
           <div className="flex items-center gap-5">
             <div className="w-20 shrink-0">
-              <BeltVisual color={belt.color} />
+              <BeltVisual color={belt.beltColor ?? belt.color} stripes={belt.stripes} stripeColor={belt.color} />
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-white/40">
                 Prüfungsprogramm
               </p>
               <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
-                {belt.kyu}. Kyu — {belt.name}
+                {gradeLabel(belt)} — {belt.name}
               </h1>
             </div>
           </div>

@@ -38,7 +38,7 @@ export function Hero() {
         className="relative z-10 mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/65 backdrop-blur"
       >
         <span className="size-1.5 rounded-full bg-emerald-400" />
-        Nach DJJV-Prüfungsordnung · Seimitsu e.V. · 5. – 1. Kyu
+        Nach DJJV-Prüfungsordnung · Seimitsu e.V. · 5. Kyu – 5. Dan
       </motion.div>
 
       <h1 className="relative z-10 max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight sm:text-7xl">

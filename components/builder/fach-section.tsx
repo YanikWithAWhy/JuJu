@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { Ban, Hammer, Info } from "lucide-react";
+import { Ban, Hammer } from "lucide-react";
 import type { PruefungsfachDef } from "@/data/types";
 import { entryKey, type TechniqueEntry } from "@/lib/program-state";
 import { cn } from "@/lib/cn";
@@ -47,6 +47,10 @@ function FachSectionImpl({ fach, index, accent, entries, onPatch }: Props) {
         </header>
 
         <div className="mt-4">
+          {fach.kind === "techniques" && fach.description && (
+            <p className="-mt-1 mb-4 text-xs leading-relaxed text-white/45">{fach.description}</p>
+          )}
+
           {fach.kind === "techniques" && (
             <div className="divide-y divide-white/[0.06]">
               {fach.techniques?.map((tech) => (
@@ -127,14 +131,6 @@ function StatusTag({ kind }: { kind: PruefungsfachDef["kind"] }) {
       <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-wide text-amber-300">
         <Hammer className="size-3" />
         In Arbeit
-      </span>
-    );
-  }
-  if (kind === "info") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.65rem] font-medium uppercase tracking-wide text-white/45">
-        <Info className="size-3" />
-        Info
       </span>
     );
   }

@@ -6,13 +6,13 @@ import { BeltCard } from "@/components/ui/belt-card";
 import { ShineLink } from "@/components/ui/shine-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AnchorLink } from "@/components/ui/anchor-link";
-import { BELTS } from "@/data/belts";
+import { DAN_BELTS, KYU_BELTS } from "@/data/belts";
 
 const steps = [
   {
     icon: Award,
     title: "Gürtelgrad wählen",
-    text: "Starte mit dem Grad, auf den du trainierst – von Gelb (5. Kyu) bis Braun (1. Kyu). Das passende Prüfungsprogramm lädt automatisch.",
+    text: "Starte mit dem Grad, auf den du trainierst – von Gelb (5. Kyu) bis Schwarz (5. Dan). Das passende Prüfungsprogramm lädt automatisch.",
   },
   {
     icon: Workflow,
@@ -111,11 +111,17 @@ export default function Home() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {BELTS.map((belt, i) => (
+        <BeltGroup title="Schülergrade" subtitle="5. – 1. Kyu" className="mt-14">
+          {KYU_BELTS.map((belt, i) => (
             <BeltCard key={belt.id} belt={belt} index={i} />
           ))}
-        </div>
+        </BeltGroup>
+
+        <BeltGroup title="Meistergrade" subtitle="1. – 5. Dan · Schwarzgurt" className="mt-16">
+          {DAN_BELTS.map((belt, i) => (
+            <BeltCard key={belt.id} belt={belt} index={i} />
+          ))}
+        </BeltGroup>
       </section>
 
       {/* ---------------------------------------------------------- */}
@@ -195,5 +201,28 @@ export default function Home() {
         </div>
       </footer>
     </main>
+  );
+}
+
+function BeltGroup({
+  title,
+  subtitle,
+  className,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <Reveal className="mb-5 flex items-center gap-4">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-white/70">{title}</h3>
+        <span className="text-sm text-white/35">{subtitle}</span>
+        <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+      </Reveal>
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </div>
   );
 }

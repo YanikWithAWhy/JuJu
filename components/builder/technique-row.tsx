@@ -38,13 +38,14 @@ function TechniqueRowImpl({ tech, accent, entries, onPatch }: Props) {
             className="ml-auto rounded-full px-2 py-0.5 text-[0.65rem] font-medium"
             style={{ backgroundColor: `${accent}1f`, color: accent }}
           >
+            {tech.executionsMax ? "bis zu " : ""}
             {executions} Ausführungen
           </span>
         )}
       </div>
 
       {/* One block per execution */}
-      {(tech.attackMode !== "none" || tech.flowchart) && (
+      {tech.flowchart && (
         <div className="mt-3 space-y-4">
           {Array.from({ length: executions }).map((_, ex) => {
             const key = entryKey(tech.id, ex);
@@ -68,61 +69,39 @@ function TechniqueRowImpl({ tech, accent, entries, onPatch }: Props) {
                   </div>
                 )}
 
-                {tech.attackMode !== "none" && (
-                  <div className="mb-3">
-                    <label className="mb-1 block text-xs font-medium text-white/45">Angriff</label>
-                    {tech.attackMode === "predefined" ? (
-                      <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/85">
-                        <span>{attackValue || "—"}</span>
-                        <span className="ml-auto rounded-full bg-white/[0.06] px-2 py-0.5 text-[0.6rem] uppercase tracking-wide text-white/40">
-                          vorgegeben
-                        </span>
-                      </div>
-                    ) : readOnly ? (
-                      <div className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/85">
-                        {attackValue || "—"}
-                      </div>
-                    ) : (
-                      <input
-                        type="text"
-                        value={attackValue}
-                        onChange={(e) => onPatch?.(key, { attack: e.target.value }, fallbackAttack)}
-                        placeholder="Angriff eintragen …"
-                        className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-white/25 focus:outline-none"
-                      />
-                    )}
-                  </div>
-                )}
-
-                {tech.flowchart && (
-                  <div>
-                    <div className="mb-1.5 flex items-center justify-between gap-2">
-                      <label className="block text-xs font-medium text-white/45">Ablauf</label>
-                      {!readOnly && link && (
-                        <button
-                          type="button"
-                          onClick={() => link.openPicker(key)}
-                          title="Bereits gezeigte Technik übernehmen"
-                          className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.7rem] font-medium text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/80"
-                        >
-                          <Import className="size-3.5" />
-                          Übernehmen
-                        </button>
-                      )}
-                    </div>
-                    <DefenseFlowchart
-                      attack={attackValue}
-                      steps={entry.steps}
-                      accent={accent}
-                      readOnly={readOnly}
-                      onChange={
-                        readOnly
-                          ? undefined
-                          : (steps) => onPatch?.(key, { steps }, fallbackAttack)
-                      }
-                    />
-                  </div>
-                )}
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label className="block text-xs font-medium text-white/45">Ablauf</label>
+                  {!readOnly && link && (
+                    <button
+                      type="button"
+                      onClick={() => link.openPicker(key)}
+                      title="Bereits gezeigte Technik übernehmen"
+                      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.7rem] font-medium text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/80"
+                    >
+                      <Import className="size-3.5" />
+                      Übernehmen
+                    </button>
+                  )}
+                </div>
+                <DefenseFlowchart
+                  attack={attackValue}
+                  showAttack={tech.attackMode !== "none"}
+                  attackLocked={tech.attackMode === "predefined"}
+                  attackPlaceholder={tech.attackPlaceholder}
+                  steps={entry.steps}
+                  accent={accent}
+                  readOnly={readOnly}
+                  onAttackChange={
+                    readOnly
+                      ? undefined
+                      : (attack) => onPatch?.(key, { attack }, fallbackAttack)
+                  }
+                  onChange={
+                    readOnly
+                      ? undefined
+                      : (steps) => onPatch?.(key, { steps }, fallbackAttack)
+                  }
+                />
               </div>
             );
           })}

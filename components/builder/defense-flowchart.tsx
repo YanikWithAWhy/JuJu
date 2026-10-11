@@ -14,13 +14,33 @@ function placeholderFor(kind: StepKind) {
 
 interface Props {
   attack: string;
+  /** Render the Angriff node at all (false for e.g. Falltechniken). Default true. */
+  showAttack?: boolean;
+  /** Predefined attack (Stock-/Messer-Angriffswinkel): shown, but not editable. */
+  attackLocked?: boolean;
+  attackPlaceholder?: string;
+  onAttackChange?: (attack: string) => void;
   steps: StepNode[];
   accent: string;
   onChange?: (steps: StepNode[]) => void;
   readOnly?: boolean;
 }
 
-export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: Props) {
+/** `data-node` index of the Angriff input (the step inputs are 0, 1, 2 …). */
+const ATTACK_NODE = -1;
+
+export function DefenseFlowchart({
+  attack,
+  showAttack = true,
+  attackLocked,
+  attackPlaceholder,
+  onAttackChange,
+  steps,
+  accent,
+  onChange,
+  readOnly,
+}: Props) {
+  const attackEditable = showAttack && !readOnly && !attackLocked && !!onAttackChange;
   const containerRef = useRef<HTMLDivElement>(null);
   const focusTarget = useRef<number | null>(null);
 
@@ -68,9 +88,17 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
     } else if (e.key === "Tab" && !e.shiftKey && i + 1 < steps.length) {
       e.preventDefault();
       focusNode(i + 1);
-    } else if (e.key === "Tab" && e.shiftKey && i - 1 >= 0) {
+    } else if (e.key === "Tab" && e.shiftKey && i - 1 >= (attackEditable ? ATTACK_NODE : 0)) {
       e.preventDefault();
       focusNode(i - 1);
+    }
+  };
+
+  // Enter / Tab in the Angriff field jump to the first step.
+  const handleAttackKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || (e.key === "Tab" && !e.shiftKey)) && steps.length > 0) {
+      e.preventDefault();
+      focusNode(0);
     }
   };
 
@@ -83,33 +111,54 @@ export function DefenseFlowchart({ attack, steps, accent, onChange, readOnly }: 
     ? steps.map((s, i) => ({ s, i })).filter(({ s }) => s.text.trim().length > 0)
     : steps.map((s, i) => ({ s, i }));
 
-  if (readOnly && visibleSteps.length === 0 && !attack.trim()) {
+  if (readOnly && visibleSteps.length === 0 && (!showAttack || !attack.trim())) {
     return <p className="text-sm italic text-white/30">Noch nicht ausgefüllt.</p>;
   }
 
   return (
     <div ref={containerRef} className="flex w-full max-w-md flex-col">
       {/* Angriff (source) */}
-      <Row
-        last={visibleSteps.length === 0 && readOnly}
-        badge={
-          <Badge style={{ backgroundColor: `${accent}26`, color: accent, borderColor: `${accent}66` }}>
-            <Swords className="size-3.5" />
-          </Badge>
-        }
-      >
-        <div
-          className="rounded-xl border p-2.5"
-          style={{ borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+      {showAttack && (
+        <Row
+          last={visibleSteps.length === 0 && readOnly}
+          badge={
+            <Badge style={{ backgroundColor: `${accent}26`, color: accent, borderColor: `${accent}66` }}>
+              <Swords className="size-3.5" />
+            </Badge>
+          }
         >
-          <span className="text-[0.62rem] font-semibold uppercase tracking-wider" style={{ color: accent }}>
-            Angriff
-          </span>
-          <div className={cn("text-sm", attack.trim() ? "text-white/90" : "text-white/30")}>
-            {attack.trim() || "—"}
+          <div
+            className="rounded-xl border p-2.5"
+            style={{ borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[0.62rem] font-semibold uppercase tracking-wider" style={{ color: accent }}>
+                Angriff
+              </span>
+              {attackLocked && (
+                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[0.58rem] uppercase tracking-wide text-white/40">
+                  vorgegeben
+                </span>
+              )}
+            </div>
+            {attackEditable ? (
+              <input
+                type="text"
+                data-node={ATTACK_NODE}
+                value={attack}
+                onChange={(e) => onAttackChange?.(e.target.value)}
+                onKeyDown={handleAttackKeyDown}
+                placeholder={attackPlaceholder ?? "Angriff eintragen …"}
+                className="mt-0.5 w-full bg-transparent text-sm text-white placeholder:text-white/25 focus:outline-none"
+              />
+            ) : (
+              <div className={cn("mt-0.5 text-sm", attack.trim() ? "text-white/90" : "text-white/30")}>
+                {attack.trim() || "—"}
+              </div>
+            )}
           </div>
-        </div>
-      </Row>
+        </Row>
+      )}
 
       {visibleSteps.map(({ s, i }, idx) => {
         const badge = badges[i];
